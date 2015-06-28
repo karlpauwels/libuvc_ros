@@ -6,7 +6,14 @@ find_package(catkin REQUIRED COMPONENTS roscpp camera_info_manager dynamic_recon
 
 generate_dynamic_reconfigure_options(cfg/UVCCamera.cfg)
 
-find_package(libuvc REQUIRED)
+add_subdirectory(libuvc)
+set(libuvc_INCLUDE_DIRS
+      ${CMAKE_CURRENT_SOURCE_DIR}/libuvc/include
+      ${CMAKE_CURRENT_BINARY_DIR}/libuvc/include
+   )
+set(libuvc_LIBRARIES uvc)
+
+#find_package(libuvc REQUIRED)
 
 catkin_package(
   CATKIN_DEPENDS
@@ -19,7 +26,7 @@ catkin_package(
   LIBRARIES libuvc_camera_nodelet
   )
 
-include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${libuvc_INCLUDE_DIRS})
+include_directories(include ${Boost_INCLUDE_DIR} ${libuvc_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LINK_DIRS})
 
 find_package(Boost REQUIRED COMPONENTS thread)

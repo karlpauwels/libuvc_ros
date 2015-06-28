@@ -164,7 +164,8 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
   assert(state_ == kRunning);
   assert(rgb_frame_);
 
-  uvc_error_t conv_ret = uvc_any2rgb(frame, rgb_frame_);
+  uvc_error_t conv_ret = (frame->frame_format == UVC_FRAME_FORMAT_MJPEG) ?
+        uvc_mjpeg2rgb(frame, rgb_frame_) : uvc_any2rgb(frame, rgb_frame_);
 
   if (conv_ret != UVC_SUCCESS) {
     uvc_perror(conv_ret, "Couldn't convert frame to RGB");
@@ -309,10 +310,13 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
 
   uvc_set_status_callback(devh_, &CameraDriver::AutoControlsCallbackAdapter, this);
 
+  uvc_frame_format format = (new_config.video_mode == "MJPEG") ?
+        UVC_FRAME_FORMAT_MJPEG : UVC_FRAME_FORMAT_UNCOMPRESSED;
+
   uvc_stream_ctrl_t ctrl;
   uvc_error_t mode_err = uvc_get_stream_ctrl_format_size(
     devh_, &ctrl,
-    UVC_COLOR_FORMAT_UNCOMPRESSED,
+    format,
     new_config.width, new_config.height,
     new_config.frame_rate);
 
